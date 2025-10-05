@@ -1,69 +1,173 @@
-Backend Analítico – PharmaVida
+# 🧠 Microservicio Analítico – PharmaVida
 
-Microservicio desarrollado en Flask para realizar consultas analíticas sobre datos almacenados en AWS Athena, obtenidos de múltiples fuentes (MySQL, PostgreSQL y MongoDB).
-Forma parte del ecosistema de servicios del proyecto PharmaVida, encargado de centralizar reportes de ventas, productos, usuarios y médicos desde una arquitectura distribuida.
+Backend desarrollado en **Flask (Python)** para ejecutar **consultas analíticas sobre AWS Athena**, obteniendo datos procesados desde múltiples fuentes (MySQL, PostgreSQL y MongoDB) previamente cargadas en **S3 mediante AWS Glue**.
+Este servicio actúa como el **motor de analítica** del ecosistema *PharmaVida*, conectado al frontend “Athena Analytics”.
 
-📁 Estructura del Proyecto
+---
+
+## 💽 Estructura del Proyecto
+
+```
 microservicio-analitico/
 ├── app/
-│   ├── main.py                      # Aplicación principal Flask
 │   ├── controller/
-│   │   └── analytics_controller.py  # Endpoints de análisis y reportes
-│   ├── service/
-│   │   └── analytics_service.py     # Lógica de negocio: ejecución de consultas
+│   │   └── analytics_controller.py     # Rutas y endpoints del microservicio
+│   ├── domain/                         # (Reservado para lógica de negocio)
 │   ├── repository/
-│   │   └── athena_repository.py     # Conexión y ejecución de queries en AWS Athena
-│   ├── domain/                      # (Futuro uso: modelos de dominio)
-│   ├── __init__.py                  # Inicialización de paquetes (puede eliminarse)
-│
-├── .env                             # Variables de entorno locales
-├── .env.example                     # Ejemplo de configuración
-├── requirements.txt                 # Dependencias del entorno Python
-└── README.md                        # Este archivo
+│   │   └── athena_repository.py        # Conexión y ejecución de queries en Athena
+│   └── service/
+│       └── analytics_service.py        # Capa intermedia entre controlador y Athena
+├── .env                                # Variables de entorno (no subir)
+├── .env.example                        # Ejemplo de configuración segura
+├── requirements.txt                    # Dependencias Python
+├── main.py                             # Punto de entrada Flask
+└── README.md                           # Este archivo
+```
 
-⚙️ Funcionalidades
+---
 
-Este microservicio permite realizar consultas analíticas sobre los datos procesados y almacenados en AWS Athena, como:
+## ⚙️ Funcionalidades Principales
 
-Ventas por distrito
+| Endpoint                             | Método | Descripción                                              |
+| ------------------------------------ | ------ | -------------------------------------------------------- |
+| `/api/analitica/ping`                | GET    | Verifica la conexión con Flask y AWS Athena              |
+| `/api/analitica/query?q=<SQL>`       | GET    | Ejecuta una consulta SQL personalizada en Athena         |
+| `/api/analitica/ventas-por-distrito` | GET    | Consulta agregada: ventas totales agrupadas por distrito |
+| `/api/analitica/ventas-por-producto` | GET    | Top 10 de productos más vendidos                         |
 
-Top productos más vendidos
+---
 
-Top clientes por gasto
+## ☁️ Flujo General
 
-Reporte de productos sin oferta o bajo stock
+```
+Frontend (Athena Dashboard)
+        ↓
+Flask API (microservicio analítico)
+        ↓
+AWS Athena (SQL Serverless)
+        ↓
+S3 Bucket con resultados
+```
 
-Consultas SQL personalizadas (en endpoints tipo /query?q=)
+Cada consulta es enviada a Athena → ejecutada sobre el **catálogo Glue definido en el entorno** →
+y los resultados son devueltos al frontend en formato JSON.
 
-🧩 Endpoints Disponibles
-1️⃣ Ping / Health Check
+---
 
-GET /api/analitica/ping
-Verifica que el backend esté activo y conectado correctamente con AWS Athena.
+## 🧩 Configuración del Entorno
 
-Respuesta
+### 1️⃣ Variables de entorno (`.env`)
 
-{ "message": "Conectado correctamente con Flask y Athena ✅" }
+Crea un archivo `.env` en la raíz del proyecto (basado en `.env.example`):
 
-2️⃣ Ventas por Distrito
+```bash
+# ==============================
+# ☁️ CONFIGURACIÓN AWS
+# ==============================
+AWS_ACCESS_KEY_ID=TU_ACCESS_KEY_ID
+AWS_SECRET_ACCESS_KEY=TU_SECRET_ACCESS_KEY
+AWS_SESSION_TOKEN=               # Opcional (para sesiones temporales)
+AWS_REGION=us-east-1
 
-GET /api/analitica/ventas-por-distrito
-Devuelve un resumen de las ventas agrupadas por distrito.
+# ==============================
+# 🧠 CONFIGURACIÓN ATHENA
+# ==============================
+ATHENA_DATABASE=farmacia_ds                  # Nombre del catálogo Glue
+ATHENA_OUTPUT_LOCATION=s3://pharmavida-athena-results/
+ATHENA_WORKGROUP=primary                     # (opcional)
+```
 
-Ejemplo de salida
+> ⚠️ **Importante:**
+>
+> * No incluyas este archivo en Git (`.env` debe estar en `.gitignore`)
+> * Asegúrate de tener permisos de ejecución sobre Athena y escritura sobre el bucket S3.
 
-[
-  { "distrito": "Ate", "ventas_totales": 1265.50 },
-  { "distrito": "Santa Anita", "ventas_totales": 842.30 }
-]
+---
 
-3️⃣ Ventas por Producto
+### 2️⃣ Credenciales de AWS
 
-GET /api/analitica/ventas-por-producto
-Consulta los productos con mayor facturación total.
+Guarda tus credenciales en el archivo local:
 
-Consulta ejecutada
+```
+~/.aws/credentials
+```
 
+```bash
+[default]
+aws_access_key_id = TU_ACCESS_KEY_ID
+aws_secret_access_key = TU_SECRET_ACCESS_KEY
+aws_session_token = TU_SESSION_TOKEN
+```
+
+---
+
+## 🚀 Ejecución del Proyecto
+
+### ▶️ En entorno local (desarrollo)
+
+```bash
+# Crear entorno virtual
+python -m venv venv
+source venv/bin/activate    # (Linux/Mac)
+venv\Scripts\activate       # (Windows)
+
+# Instalar dependencias
+pip install -r requirements.txt
+
+# Ejecutar el servidor Flask
+python main.py
+```
+
+El backend quedará disponible en:
+
+```
+http://localhost:5000/api/analitica
+```
+
+---
+
+### ▶️ Ejemplo de uso con `curl`
+
+#### Verificar conexión
+
+```bash
+curl http://localhost:5000/api/analitica/ping
+```
+
+#### Consultar ventas por distrito
+
+```bash
+curl http://localhost:5000/api/analitica/ventas-por-distrito
+```
+
+#### Ejecutar query personalizada
+
+```bash
+curl "http://localhost:5000/api/analitica/query?q=SELECT * FROM mysql_compras_csv LIMIT 5"
+```
+
+---
+
+## 📊 Consultas Implementadas
+
+### 1️⃣ Ventas diarias
+
+```sql
+SELECT 
+    date_format(date_parse(c.fecha_compra, '%Y-%m-%d %H:%i:%s'), '%Y-%m-%d') AS fecha_dia,
+    SUM(cc.cantidad) AS total_unidades,
+    SUM(cc.cantidad * p.precio) AS total_monto
+FROM compras c
+JOIN compra_productos cp ON c.id = cp.compra_id
+JOIN compra_cantidades cc ON c.id = cc.compra_id
+JOIN productos p ON cp.producto_id = p.id
+GROUP BY 1
+ORDER BY 1;
+```
+
+### 2️⃣ Top 10 productos más vendidos
+
+```sql
 SELECT 
     p.id AS producto_id,
     p.nombre,
@@ -75,19 +179,11 @@ JOIN productos p ON cp.producto_id = p.id
 GROUP BY p.id, p.nombre
 ORDER BY facturacion_total DESC
 LIMIT 10;
+```
 
+### 3️⃣ Usuarios con mayor gasto
 
-Ejemplo de respuesta
-
-[
-  { "producto_id": 1, "nombre": "Paracetamol 500mg", "total_unidades": 320, "facturacion_total": 1850.00 },
-  { "producto_id": 2, "nombre": "Ibuprofeno 400mg", "total_unidades": 210, "facturacion_total": 1320.50 }
-]
-
-4️⃣ Top Clientes (Gasto Total)
-
-GET /api/analitica/top-clientes
-
+```sql
 SELECT 
     u.id AS usuario_id,
     u.nombre,
@@ -101,11 +197,11 @@ JOIN productos p ON cp.producto_id = p.id
 GROUP BY u.id, u.nombre, u.apellido
 ORDER BY gasto_total DESC
 LIMIT 10;
+```
 
-5️⃣ Productos sin oferta activa
+### 4️⃣ Productos sin venta ni oferta
 
-GET /api/analitica/productos-sin-oferta
-
+```sql
 SELECT 
     p.id AS producto_id,
     p.nombre AS nombre_producto,
@@ -120,98 +216,54 @@ LEFT JOIN ofertas o ON od.oferta_id = o.id
 WHERE cp.producto_id IS NULL
   AND (o.fecha_vencimiento IS NULL OR o.fecha_vencimiento = '')
 ORDER BY p.nombre;
+```
 
-6️⃣ Consulta Personalizada
+---
 
-GET /api/analitica/query?q=<consulta>
-Permite ejecutar queries SQL personalizadas directamente sobre el catálogo de Athena.
+## 🧬 Estructura de Respuesta JSON
 
-Ejemplo
+Ejemplo de retorno de Athena:
 
-GET /api/analitica/query?q=SELECT COUNT(*) AS total FROM compras;
+```json
+[
+  { "distrito": "Huaycán", "ventas_totales": 5234.50 },
+  { "distrito": "Ate", "ventas_totales": 3900.75 }
+]
+```
 
-⚙️ Configuración
-1️⃣ Variables de Entorno
+---
 
-Crear un archivo .env en la raíz del proyecto basado en .env.example:
+## 🔧 Requisitos del Sistema
 
-# AWS Credentials
-AWS_ACCESS_KEY_ID=TU_ACCESS_KEY_ID
-AWS_SECRET_ACCESS_KEY=TU_SECRET_ACCESS_KEY
-AWS_SESSION_TOKEN=                     # opcional
-AWS_REGION=us-east-1
+* Python 3.11+
+* AWS CLI configurado
+* Credenciales válidas de AWS (Athena, S3, Glue)
+* Acceso al bucket de resultados definido en `.env`
 
-# Athena Configuration
-ATHENA_DATABASE=farmacia_ds
-ATHENA_OUTPUT_LOCATION=s3://pharmavida-athena-results/
+---
 
-# Flask Config
-HOST=0.0.0.0
-PORT=5000
-DEBUG=True
+## 🛡️ Seguridad
 
-☁️ Configuración AWS
-1️⃣ Requisitos
+* ✅ No se exponen credenciales en el repositorio
+* ✅ `.env` y `~/.aws/credentials` deben mantenerse privados
+* ✅ Peticiones HTTPS recomendadas en despliegue
+* ✅ Configuración modular: AWS, Flask y Athena gestionados por variables de entorno
 
-Bucket S3 existente: pharmavida-athena-results
+---
 
-Configuración de credenciales válida en el entorno:
+## 🛠️ Troubleshooting
 
-~/.aws/credentials (si se ejecuta localmente)
+| Problema                               | Solución                                                                       |
+| -------------------------------------- | ------------------------------------------------------------------------------ |
+| **Error: `La consulta falló: FAILED`** | Verifica que las tablas en Glue tengan datos y delimitadores correctos.        |
+| **Error de credenciales AWS**          | Asegúrate de haber configurado `~/.aws/credentials` y `.env` correctamente.    |
+| **Bucket inexistente o sin permisos**  | Crea el bucket y asigna permisos de lectura/escritura.                         |
+| **Flask no conecta con frontend**      | Asegúrate de habilitar CORS (`flask_cors.CORS(app)`) y usar IP local correcta. |
 
-Variables de entorno (si se ejecuta en contenedor o EC2)
+---
 
-🧠 Uso
-🔹 1. Ejecutar localmente
-cd microservicio-analitico
-python -m venv venv
-source venv/bin/activate    # Linux/Mac
-# o
-venv\Scripts\activate       # Windows
+## 📘 Autor
 
-pip install -r requirements.txt
-python app/main.py
-
-
-El servicio se levantará en:
-👉 http://localhost:5000
-
-👉 http://192.168.1.90:5000
- (LAN)
-
-🔹 2. Verificar conexión
-curl http://localhost:5000/api/analitica/ping
-
-🔹 3. Consultar endpoints desde frontend (React)
-
-En tu .env del frontend:
-
-VITE_API_ANALITICA=http://192.168.1.90:5000/api/analitica
-
-📊 Ejemplo de Visualización (Frontend React)
-
-El panel AnaliticaDashboard en React consume los endpoints anteriores mediante fetchAnalitica()
-para mostrar tablas de resumen de ventas, productos y usuarios, con paginación automática.
-
-🧱 Validaciones y Manejo de Errores
-
-El microservicio maneja errores con mensajes estructurados:
-
-{ "error": "La consulta falló: FAILED" }
-
-
-Validaciones:
-✅ Manejo de errores de conexión a Athena
-✅ Respuesta JSON uniforme
-✅ CORS habilitado para frontend local (React)
-✅ Logging de consultas fallidas
-
-🧰 Requisitos del Sistema
-
-Python 3.10+
-
-Paquetes: Flask, boto3, python-dotenv
-
-Acceso a bucket S3 y permisos en Athena
-
-Archivo .env correctamente configurado
+**PharmaVida Data Team**
+Desarrollado por el equipo de Ingeniería de Datos y Backend de *PharmaVida*
+🧠 Integrado con el ecosistema **Athena Analytics Dashboard**.

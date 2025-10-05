@@ -1,11 +1,11 @@
-# 🧠 Microservicio Analítico – PharmaVida
+# Microservicio Analítico – PharmaVida
 
 Backend desarrollado en **Flask (Python)** para ejecutar **consultas analíticas sobre AWS Athena**, obteniendo datos procesados desde múltiples fuentes (MySQL, PostgreSQL y MongoDB) previamente cargadas en **S3 mediante AWS Glue**.
 Este servicio actúa como el **motor de analítica** del ecosistema *PharmaVida*, conectado al frontend “Athena Analytics”.
 
 ---
 
-## 💽 Estructura del Proyecto
+## Estructura del Proyecto
 
 ```
 microservicio-analitico/
@@ -25,7 +25,7 @@ microservicio-analitico/
 
 ---
 
-## ⚙️ Funcionalidades Principales
+## Funcionalidades Principales
 
 | Endpoint                             | Método | Descripción                                              |
 | ------------------------------------ | ------ | -------------------------------------------------------- |
@@ -36,7 +36,7 @@ microservicio-analitico/
 
 ---
 
-## ☁️ Flujo General
+## Flujo General
 
 ```
 Frontend (Athena Dashboard)
@@ -53,15 +53,15 @@ y los resultados son devueltos al frontend en formato JSON.
 
 ---
 
-## 🧩 Configuración del Entorno
+## Configuración del Entorno
 
-### 1️⃣ Variables de entorno (`.env`)
+### Variables de entorno (`.env`)
 
 Crea un archivo `.env` en la raíz del proyecto (basado en `.env.example`):
 
 ```bash
 # ==============================
-# ☁️ CONFIGURACIÓN AWS
+# CONFIGURACIÓN AWS
 # ==============================
 AWS_ACCESS_KEY_ID=TU_ACCESS_KEY_ID
 AWS_SECRET_ACCESS_KEY=TU_SECRET_ACCESS_KEY
@@ -69,7 +69,7 @@ AWS_SESSION_TOKEN=               # Opcional (para sesiones temporales)
 AWS_REGION=us-east-1
 
 # ==============================
-# 🧠 CONFIGURACIÓN ATHENA
+# CONFIGURACIÓN ATHENA
 # ==============================
 ATHENA_DATABASE=farmacia_ds                  # Nombre del catálogo Glue
 ATHENA_OUTPUT_LOCATION=s3://pharmavida-athena-results/
@@ -83,9 +83,9 @@ ATHENA_WORKGROUP=primary                     # (opcional)
 
 ---
 
-## 🚀 Ejecución del Proyecto
+## Ejecución del Proyecto
 
-### ▶️ En entorno local (desarrollo)
+### En entorno local (desarrollo)
 
 ```bash
 # Crear entorno virtual
@@ -108,7 +108,7 @@ http://localhost:5000/api/analitica
 
 ---
 
-### ▶️ Ejemplo de uso con `curl`
+### Ejemplo de uso con `curl`
 
 #### Verificar conexión
 
@@ -130,9 +130,9 @@ curl "http://localhost:5000/api/analitica/query?q=SELECT * FROM mysql_compras_cs
 
 ---
 
-## 📊 Consultas Implementadas
+## Consultas Implementadas
 
-### 1️⃣ Ventas diarias
+### Ventas diarias
 
 ```sql
 SELECT 
@@ -147,7 +147,7 @@ GROUP BY 1
 ORDER BY 1;
 ```
 
-### 2️⃣ Top 10 productos más vendidos
+### Top 10 productos más vendidos
 
 ```sql
 SELECT 
@@ -163,7 +163,7 @@ ORDER BY facturacion_total DESC
 LIMIT 10;
 ```
 
-### 3️⃣ Usuarios con mayor gasto
+### Usuarios con mayor gasto
 
 ```sql
 SELECT 
@@ -181,7 +181,7 @@ ORDER BY gasto_total DESC
 LIMIT 10;
 ```
 
-### 4️⃣ Productos sin venta ni oferta
+### Productos sin venta ni oferta
 
 ```sql
 SELECT 
@@ -202,7 +202,7 @@ ORDER BY p.nombre;
 
 ---
 
-## 🧬 Estructura de Respuesta JSON
+## Estructura de Respuesta JSON
 
 Ejemplo de retorno de Athena:
 
@@ -215,7 +215,7 @@ Ejemplo de retorno de Athena:
 
 ---
 
-## 🔧 Requisitos del Sistema
+## Requisitos del Sistema
 
 * Python 3.11+
 * AWS CLI configurado
@@ -224,7 +224,7 @@ Ejemplo de retorno de Athena:
 
 ---
 
-## 🛡️ Seguridad
+## Seguridad
 
 * ✅ No se exponen credenciales en el repositorio
 * ✅ `.env` y `~/.aws/credentials` deben mantenerse privados
@@ -233,7 +233,7 @@ Ejemplo de retorno de Athena:
 
 ---
 
-## 🛠️ Troubleshooting
+## Troubleshooting
 
 | Problema                               | Solución                                                                       |
 | -------------------------------------- | ------------------------------------------------------------------------------ |

@@ -17,7 +17,6 @@ microservicio-analitico/
 │   │   └── athena_repository.py        # Conexión y ejecución de queries en Athena
 │   └── service/
 │       └── analytics_service.py        # Capa intermedia entre controlador y Athena
-├── .env                                # Variables de entorno (no subir)
 ├── .env.example                        # Ejemplo de configuración segura
 ├── requirements.txt                    # Dependencias Python
 ├── main.py                             # Punto de entrada Flask

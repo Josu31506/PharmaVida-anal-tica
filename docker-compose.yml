@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  analytics-api:
+    build: .
+    container_name: pharmavida_analytics
+    env_file:
+      - .env
+    ports:
+      - "5000:5000"
+    restart: unless-stopped
+    volumes:
+      - .:/app
+    environment:
+      - PYTHONPATH=/app
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/echo"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s

@@ -9,18 +9,12 @@ from dotenv import load_dotenv
 load_dotenv()
 
 app = Flask(__name__)
-app = Flask(__name__)
 
 # Habilitar CORS (para que el frontend pueda hacer requests)
 CORS(app)
 
 # Registrar el Blueprint del microservicio analítico
 app.register_blueprint(analytics_bp, url_prefix="/api/analitica")
-
-# Ruta base para verificar que el backend está corriendo
-@app.route("/")
-def home():
-    return {"message": "Microservicio Analítico activo ✅"}
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)

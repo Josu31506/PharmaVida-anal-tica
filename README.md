@@ -84,23 +84,6 @@ ATHENA_WORKGROUP=primary                     # (opcional)
 
 ---
 
-### 2️⃣ Credenciales de AWS
-
-Guarda tus credenciales en el archivo local:
-
-```
-~/.aws/credentials
-```
-
-```bash
-[default]
-aws_access_key_id = TU_ACCESS_KEY_ID
-aws_secret_access_key = TU_SECRET_ACCESS_KEY
-aws_session_token = TU_SESSION_TOKEN
-```
-
----
-
 ## 🚀 Ejecución del Proyecto
 
 ### ▶️ En entorno local (desarrollo)

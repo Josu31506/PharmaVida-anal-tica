@@ -25,3 +25,9 @@ def productos_sin_venta():
 @analytics_bp.route("/ping", methods=["GET"])
 def ping():
     return {"message": "Conectado correctamente con Flask y Athena ✅"}
+@analytics_bp.route("/docs", methods=["GET"])
+def docs_redirect():
+    from flask import redirect
+    return redirect("/apidocs")
+
+

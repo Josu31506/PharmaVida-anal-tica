@@ -14,6 +14,12 @@ app = Flask(__name__)
 # Habilitar CORS (para que el frontend pueda hacer requests)
 CORS(app)
 
+# 🔹 Configurar Swagger UI
+app.config['SWAGGER'] = {
+    'title': 'PharmaVida Analítica API',
+    'uiversion': 3
+}
+
 # Registrar el Blueprint del microservicio analítico
 app.register_blueprint(analytics_bp, url_prefix="/api/analitica")
 
@@ -24,3 +30,4 @@ def home():
 
 if __name__ == "__main__":
     app.run(host="0.0.0.0", port=5000, debug=True)
+
